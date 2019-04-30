@@ -206,12 +206,15 @@ class MaterialTable extends React.Component {
         });
       });
     });
+  }  
+
+  search = (txt) => {
+    this.invalidated++;      
+    this.dataManager.changeSearchText(txt);
+    this.doSearch();
   }
 
-  onSearchChange = debounce(() => {
-    this.invalidated++;    
-    this.dataManager.changeSearchText(this.state.searchText);
-
+  doSearch = () => {
     if (this.isRemoteData()) {
       const query = { ...this.state.query };
       query.page = 0;
@@ -222,6 +225,13 @@ class MaterialTable extends React.Component {
     else {
       this.setState(this.dataManager.getRenderState());
     }
+  }
+
+  onSearchChange = debounce(() => {
+    this.invalidated++;      
+    this.dataManager.changeSearchText(this.state.searchText);
+
+    this.doSearch();
   }, this.props.options.debounceInterval)
 
   onFilterChange = debounce(() => {
