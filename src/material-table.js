@@ -321,6 +321,8 @@ class MaterialTable extends React.Component {
     // backward compatibility
     if (this.state.dataAge === -1) { return true }        
 
+    if (this.state.searchText !== nextState.searchText) { this.invalidated++ }
+
     if (this.renderedDataAge < this.props.dataAge) {
       this.renderedDataAge = this.props.dataAge;
       this.invalidated = 0;
