@@ -51,7 +51,7 @@ class MaterialTable extends React.Component {
     };
   }
 
-  componentDidMount() {
+  componentDidMount() {    
     this.setState(this.dataManager.getRenderState(), () => {
       if (this.isRemoteData()) {
         this.onQueryChange(this.state.query);
@@ -151,8 +151,7 @@ class MaterialTable extends React.Component {
     return calculatedProps;
   }
 
-  onSelectionChange = () => {
-    this.invalidated++;
+  onSelectionChange = () => {    
     if (this.props.onSelectionChange) {
       const selectedRows = [];
 
@@ -171,25 +170,21 @@ class MaterialTable extends React.Component {
     }
   }
 
-  onChangePage = (...args) => {
-    this.invalidated++;
+  onChangePage = (...args) => {    
     this.props.onChangePage && this.props.onChangePage(...args);
   }
 
-  onChangeRowsPerPage = (...args) => {
-    this.invalidated++;
+  onChangeRowsPerPage = (...args) => {    
     this.props.onChangeRowsPerPage && this.props.onChangeRowsPerPage(...args);
   }
 
-  onOrderChange = (...args) => {
-    this.invalidated++;
+  onOrderChange = (...args) => {    
     this.props.onOrderChange && this.props.onOrderChange(...args);
   }
 
   isRemoteData = () => !Array.isArray(this.props.data)
 
-  onQueryChange = (query, callback) => {
-    this.invalidated++;    
+  onQueryChange = (query, callback) => {    
     query = { ...this.state.query, ...query };
 
     this.setState({ isLoading: true }, () => {
@@ -234,8 +229,7 @@ class MaterialTable extends React.Component {
     this.doSearch();
   }, this.props.options.debounceInterval)
 
-  onFilterChange = debounce(() => {
-    this.invalidated++;    
+  onFilterChange = debounce(() => {    
     if (this.isRemoteData()) {
       const query = { ...this.state.query };
       query.filters = this.state.columns
@@ -279,6 +273,7 @@ class MaterialTable extends React.Component {
                 }}
                 page={this.isRemoteData() ? this.state.query.page : this.state.currentPage}
                 onChangePage={(event, page) => {
+                  this.invalidated++;
                   if (this.isRemoteData()) {
                     const query = { ...this.state.query };
                     query.page = page;
@@ -292,6 +287,7 @@ class MaterialTable extends React.Component {
                   }
                 }}
                 onChangeRowsPerPage={(event) => {
+                  this.invalidated++;
                   this.dataManager.changePageSize(event.target.value);
 
                   if (this.isRemoteData()) {
@@ -368,8 +364,9 @@ class MaterialTable extends React.Component {
               searchText={this.state.searchText}
               searchFieldStyle={props.options.searchFieldStyle}
               title={props.title}
-              onSearchChanged={searchText => this.setState({ searchText }, this.onSearchChange)}
+              onSearchChanged={searchText => { this.invalidated++; this.setState({ searchText }, this.onSearchChange) }}
               onColumnsChanged={(columnId, hidden) => {
+                this.invalidated++;
                 this.dataManager.changeColumnHidden(columnId, hidden);
                 this.setState(this.dataManager.getRenderState());
               }}
@@ -385,10 +382,12 @@ class MaterialTable extends React.Component {
                 .sort((col1, col2) => col1.tableData.groupOrder - col2.tableData.groupOrder)
               }
               onSortChanged={(groupedColumn) => {
+                this.invalidated++;
                 this.dataManager.changeGroupOrder(groupedColumn.tableData.id);
                 this.setState(this.dataManager.getRenderState());
               }}
               onGroupRemoved={(groupedColumn, index) => {
+                this.invalidated++;
                 const result = {
                   combine: null,
                   destination: { droppableId: "headers", index: 0 },
@@ -426,10 +425,12 @@ class MaterialTable extends React.Component {
                           orderBy={this.state.orderBy}
                           orderDirection={this.state.orderDirection}
                           onAllSelected={(checked) => {
+                            this.invalidated++;
                             this.dataManager.changeAllSelected(checked);
                             this.setState(this.dataManager.getRenderState(), () => this.onSelectionChange());
                           }}
                           onOrderChange={(orderBy, orderDirection) => {
+                            this.invalidated++;    
                             this.dataManager.changeOrder(orderBy, orderDirection);
 
                             if (this.isRemoteData()) {
@@ -467,32 +468,39 @@ class MaterialTable extends React.Component {
                         getFieldValue={this.dataManager.getFieldValue}
                         isTreeData={this.props.parentChildData !== undefined}
                         onFilterChanged={(columnId, value) => {
+                          this.invalidated++;
                           this.dataManager.changeFilterValue(columnId, value);
                           this.setState({}, () => this.onFilterChange());
                         }}
                         onFilterSelectionChanged={(event) => {
+                          this.invalidated++;
                           this.dataManager.changeFilterSelectionChecked(event.target.checked);
                           this.setState(this.dataManager.getRenderState());
                         }}
                         onRowSelected={(event, path) => {
+                          this.invalidated++;
                           this.dataManager.changeRowSelected(event.target.checked, path);
                           this.setState(this.dataManager.getRenderState(), () => this.onSelectionChange());
                         }}
                         onToggleDetailPanel={(path, render) => {
+                          this.invalidated++;
                           this.dataManager.changeDetailPanelVisibility(path, render);
                           this.setState(this.dataManager.getRenderState());
                         }}
                         onGroupExpandChanged={(path) => {
+                          this.invalidated++;
                           this.dataManager.changeGroupExpand(path);
                           this.setState(this.dataManager.getRenderState());
                         }}
                         onTreeExpandChanged={(path, data) => {
+                          this.invalidated++;
                           this.dataManager.changeTreeExpand(path);
                           this.setState(this.dataManager.getRenderState(), () => {
                             this.props.onTreeExpandChange && this.props.onTreeExpandChange(data, data.tableData.isTreeExpanded);
                           });
                         }}
                         onEditingCanceled={(mode, rowData) => {
+                          this.invalidated++;
                           if (mode === "add") {
                             this.setState({ showAddRow: false });
                           }
@@ -502,6 +510,7 @@ class MaterialTable extends React.Component {
                           }
                         }}
                         onEditingApproved={(mode, newData, oldData) => {
+                          this.invalidated++;    
                           if (mode === "add") {
                             this.setState({ isLoading: true }, () => {
                               this.props.editable.onRowAdd(newData)
