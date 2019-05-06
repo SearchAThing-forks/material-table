@@ -109,6 +109,7 @@ class MaterialTable extends React.Component {
           tooltip: localization.addTooltip,
           isFreeAction: true,
           onClick: () => {
+            this.invalidated++;
             this.dataManager.changeRowEditing();
             this.setState({
               ...this.dataManager.getRenderState(),
@@ -122,6 +123,7 @@ class MaterialTable extends React.Component {
           icon: calculatedProps.icons.Edit,
           tooltip: localization.editTooltip,
           onClick: (e, rowData) => {
+            this.invalidated++;
             this.dataManager.changeRowEditing(rowData, "update");
             this.setState({
               ...this.dataManager.getRenderState(),
@@ -135,6 +137,7 @@ class MaterialTable extends React.Component {
           icon: calculatedProps.icons.Delete,
           tooltip: localization.deleteTooltip,
           onClick: (e, rowData) => {
+            this.invalidated++;
             this.dataManager.changeRowEditing(rowData, "delete");
             this.setState({
               ...this.dataManager.getRenderState(),
